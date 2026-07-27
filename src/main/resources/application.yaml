@@ -3,12 +3,11 @@ spring:
     name: Simple-Rag-App
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY}
       chat:
-        model: gemini-3.6-flash
-        base-url: https://generativelanguage.googleapis.com/v1beta/openai/
-      embedding:
+        base-url: https://api.groq.com/openai/v1
+        model: llama-3.3-70b-versatile
         api-key: ${OPENAI_API_KEY}
-        model: gemini-embedding-2
-        base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+      embedding:
+        base-url: http://localhost:11434/v1
+        model: nomic-embed-text
 

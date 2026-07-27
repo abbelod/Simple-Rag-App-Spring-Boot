@@ -77,7 +77,7 @@ public class RagController {
 
         String answer = chatClient.prompt()
                 .user(payload.query())
-//                .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+                .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
                 .call()
                 .content();
 
