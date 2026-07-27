@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: Simple-Rag-App
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        model: gemini-3.6-flash
+        base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+      embedding:
+        api-key: ${OPENAI_API_KEY}
+        model: gemini-embedding-2
+        base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+
