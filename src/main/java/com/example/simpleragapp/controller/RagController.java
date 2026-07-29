@@ -3,6 +3,7 @@ package com.example.simpleragapp.controller;
 
 import com.example.simpleragapp.dto.SearchRequestPayload;
 import com.example.simpleragapp.dto.SearchResponse;
+import com.example.simpleragapp.service.JsonIngestionService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -27,10 +28,14 @@ public class RagController {
 
     private final VectorStore vectorStore;
     private final ChatClient chatClient;
+    private final TokenTextSplitter tokenTextSplitter;
+    private final JsonIngestionService jsonIngestionService;
 
-    public RagController(VectorStore vectorStore, ChatClient chatClient) {
+    public RagController(VectorStore vectorStore, ChatClient chatClient, TokenTextSplitter tokenTextSplitter, JsonIngestionService jsonIngestionService) {
         this.chatClient = chatClient;
         this.vectorStore = vectorStore;
+        this.tokenTextSplitter = tokenTextSplitter;
+        this.jsonIngestionService = jsonIngestionService;
     }
 
 
@@ -45,15 +50,7 @@ public class RagController {
             TikaDocumentReader documentReader = new TikaDocumentReader(resource);
             List<Document> documents = documentReader.read();
 
-            TokenTextSplitter textSplitter = TokenTextSplitter.builder()
-                    .withChunkSize(800)
-                    .withMinChunkSizeChars(350)
-                    .withMinChunkLengthToEmbed(5)
-                    .withMaxNumChunks(1000)
-                    .withKeepSeparator(true)
-                    .build();
-
-            List<Document> chunkedDocuments = textSplitter.apply(documents);
+            List<Document> chunkedDocuments = tokenTextSplitter.apply(documents);
 
 
             vectorStore.accept(chunkedDocuments);
@@ -85,6 +82,18 @@ public class RagController {
 
         return ResponseEntity.ok(new SearchResponse(payload.query(), answer));
     }
+
+    @GetMapping("/ingest-json")
+    public ResponseEntity<String> ingestJsonFiles(@RequestParam("folderPath") String folderPath) {
+        try {
+            int chunksIngested = jsonIngestionService.ingestJsonFilesFromFolder(folderPath);
+            return ResponseEntity.ok("Successfully ingested " + chunksIngested + " chunks from JSON files.");
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("Failed to read JSON files: " + e.getMessage());
+        }
+    }
+
+
 
 
 }
