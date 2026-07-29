@@ -5,6 +5,7 @@ import com.example.simpleragapp.dto.SearchRequestPayload;
 import com.example.simpleragapp.dto.SearchResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
@@ -70,13 +71,14 @@ public class RagController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<SearchResponse> searchAndAnswer(@RequestParam("query") SearchRequestPayload payload) {
+    public ResponseEntity<SearchResponse> searchAndAnswer(@RequestParam("query") SearchRequestPayload payload, @RequestParam(value = "convoId", defaultValue = "1") String convoId) {
         if(payload.query() == null  || payload.query().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
         String answer = chatClient.prompt()
                 .user(payload.query())
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, convoId))
                 .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
                 .call()
                 .content();
